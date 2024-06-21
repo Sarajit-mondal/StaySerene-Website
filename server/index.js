@@ -44,7 +44,7 @@ const sendEmail = (emailAddress, emailData) => {
     }
   })
   const mailBody = {
-    from: `"StayVista" <${process.env.TRANSPORTER_EMAIL}>`, // sender address
+    from: `"StaySerene" <${process.env.TRANSPORTER_EMAIL}>`, // sender address
     to: emailAddress, // list of receivers
     subject: emailData.subject, // Subject line
     html: emailData.message, // html body
@@ -76,7 +76,7 @@ const verifyToken = async (req, res, next) => {
   })
 }
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@main.mq0mae1.mongodb.net/?retryWrites=true&w=majority&appName=Main`
+const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@sarajit.p784vrh.mongodb.net/?retryWrites=true&w=majority&appName=sarajit`
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -87,9 +87,9 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const db = client.db('stayvista')
-    const roomsCollection = db.collection('rooms')
-    const usersCollection = db.collection('users')
+    const db = client.db('StaySereneData')
+    const roomsCollection = db.collection('Rooms')
+    const usersCollection = db.collection('User')
     const bookingsCollection = db.collection('bookings')
     // verify admin middleware
     const verifyAdmin = async (req, res, next) => {
@@ -196,7 +196,7 @@ async function run() {
       const result = await usersCollection.updateOne(query, updateDoc, options)
       // welcome new user
       sendEmail(user?.email, {
-        subject: 'Welcome to Stayvista!',
+        subject: 'Welcome to StaySerene!',
         message: `Hope you will find you destination`,
       })
       res.send(result)
@@ -282,7 +282,7 @@ async function run() {
       // send email to guest
       sendEmail(bookingData?.guest?.email, {
         subject: 'Booking Successful!',
-        message: `You've successfully booked a room through StayVista. Transaction Id: ${bookingData.transactionId}`,
+        message: `You've successfully booked a room through StaySerene. Transaction Id: ${bookingData.transactionId}`,
       })
       // send email to host
       sendEmail(bookingData?.host?.email, {
@@ -497,15 +497,17 @@ async function run() {
   }
 }
 run().catch(console.dir)
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
 
 app.get('/', (req, res) => {
-  res.send('Hello from StayVista Server..')
+  res.send('Hello from StaySerene Server..')
 })
 
 // test email
 // app.get('/email', async (req, res) => {
 //   const { data, error } = await resend.emails.send({
-//     from: 'StayVista <onboarding@resend.dev>',
+//     from: 'StaySerene <onboarding@resend.dev>',
 //     to: ['xidode6213@acuxi.com'],
 //     subject: 'Hello World',
 //     html: '<strong>It works!</strong>',
@@ -519,5 +521,5 @@ app.get('/', (req, res) => {
 // })
 
 app.listen(port, () => {
-  console.log(`StayVista is running on port ${port}`)
+  console.log(`StaySerene is running on port http://localhost:${port}`)
 })

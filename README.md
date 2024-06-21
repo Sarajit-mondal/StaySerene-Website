@@ -1,8 +1,8 @@
-# stayVista-starter-template
+# StaySerene-starter-template
 
 ### Important Links:
 
-- [StayVista Resources](https://github.com/shakilahmedatik/b9-stayVista-resources)
+- [StaySerene Resources](https://github.com/shakilahmedatik/b9-StaySerene-resources)
 - [Project Requirement Doc](https://docs.google.com/document/d/1rzueKvZTinMb3XY7cuDNH0S0d_l8CflG1H95VUi2Dto/edit?usp=sharing)
 
 ### Packages and api docs used in this project:
