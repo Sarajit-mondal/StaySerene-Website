@@ -89,7 +89,7 @@ async function run() {
   try {
     const db = client.db('StaySereneData')
     const roomsCollection = db.collection('Rooms')
-    const usersCollection = db.collection('User')
+    const usersCollection = db.collection('Users')
     const bookingsCollection = db.collection('bookings')
     // verify admin middleware
     const verifyAdmin = async (req, res, next) => {
@@ -166,9 +166,9 @@ async function run() {
     })
 
     // save a user data in db
-    app.put('/user', async (req, res) => {
+    app.put('/users', async (req, res) => {
       const user = req.body
-
+      console.log(user)
       const query = { email: user?.email }
       // check if user already exists in db
       const isExist = await usersCollection.findOne(query)
@@ -208,6 +208,7 @@ async function run() {
       const result = await usersCollection.findOne({ email })
       res.send(result)
     })
+    
 
     // get all users data from db
     app.get('/users', verifyToken, verifyAdmin, async (req, res) => {

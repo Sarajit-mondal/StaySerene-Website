@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import { createContext, useEffect, useState } from 'react'
 import {
+  FacebookAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
@@ -11,11 +12,15 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth'
+
+import useAxiosCommon from '../hooks/useAxiosCommon'
 import { app } from '../firebase/firebase.config'
-import axios from 'axios'
+
 export const AuthContext = createContext(null)
 const auth = getAuth(app)
 const googleProvider = new GoogleAuthProvider()
+const facebookProvider = new FacebookAuthProvider()
+const axiosCommon = useAxiosCommon()
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
@@ -30,10 +35,28 @@ const AuthProvider = ({ children }) => {
     setLoading(true)
     return signInWithEmailAndPassword(auth, email, password)
   }
-
+//signInWight Googel
   const signInWithGoogle = () => {
     setLoading(true)
     return signInWithPopup(auth, googleProvider)
+  }
+//signInWight Facebook
+  const signInWithFacebook = () => {
+    setLoading(true)
+    return signInWithPopup(auth, facebookProvider)
+  }
+
+  //signOut firebase
+  // const logOutFirebase =()=>{
+  //   setLoading(true)
+  //  return signOut(auth)
+  // }
+  const logOut = async () => {
+    setLoading(true)
+    // await axios.get(`${import.meta.env.VITE_API_URL}/logout`, {
+    //   withCredentials: true,
+    // })
+     return signOut(auth)
   }
 
   const resetPassword = email => {
@@ -41,14 +64,7 @@ const AuthProvider = ({ children }) => {
     return sendPasswordResetEmail(auth, email)
   }
 
-  const logOut = async () => {
-    setLoading(true)
-    await axios.get(`${import.meta.env.VITE_API_URL}/logout`, {
-      withCredentials: true,
-    })
-    return signOut(auth)
-  }
-
+ //updateProfile
   const updateUserProfile = (name, photo) => {
     return updateProfile(auth.currentUser, {
       displayName: name,
@@ -56,36 +72,40 @@ const AuthProvider = ({ children }) => {
     })
   }
   // Get token from server
-  const getToken = async email => {
-    const { data } = await axios.post(
+  const getToken = async userInfo => {
+   try {
+    const { data } = await axiosCommon.post(
       `${import.meta.env.VITE_API_URL}/jwt`,
-      { email },
-      { withCredentials: true }
-    )
-    return data
+     userInfo)
+     localStorage.setItem('access-token',data.token)
+   } catch (error) {
+    
+   }
+    
   }
-
-  // save user
-  const saveUser = async user => {
-    const currentUser = {
-      email: user?.email,
-      role: 'guest',
-      status: 'Verified',
+  // set new user in database
+  const newUser = async(infoUser)=>{
+    try {
+      const {data} =await axiosCommon.put('/users',infoUser)
+    } catch (error) {
+      //(error)
     }
-    const { data } = await axios.put(
-      `${import.meta.env.VITE_API_URL}/user`,
-      currentUser
-    )
-    return data
   }
 
   // onAuthStateChange
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser)
+      const userInfo = {email: currentUser?.email}
+      const infouser = {
+        email: currentUser?.email,
+        role : "Participant"
+      }
       if (currentUser) {
-        getToken(currentUser.email)
-        saveUser(currentUser)
+        getToken(userInfo)
+        newUser(infouser)
+      }else{
+        localStorage.removeItem('access-token')
       }
       setLoading(false)
     })
@@ -101,9 +121,10 @@ const AuthProvider = ({ children }) => {
     createUser,
     signIn,
     signInWithGoogle,
+    signInWithFacebook,
     resetPassword,
-    logOut,
     updateUserProfile,
+    logOut
   }
 
   return (
